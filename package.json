@@ -1,0 +1,16 @@
+{
+  "name": "vigil",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0"
+  }
+}
