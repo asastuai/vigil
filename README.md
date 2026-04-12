@@ -56,6 +56,15 @@ curl "http://localhost:3402/v1/defi/oracle-health?pair=ETH/USD"
 
 # What happens if ETH drops 20%?
 curl "http://localhost:3402/v1/defi/liquidation-risk?protocol=aave-v3&asset=ETH&priceDropPct=20"
+
+# What's the MEV risk for a $50K swap on this pool?
+curl "http://localhost:3402/v1/defi/mev-exposure?pool=0xd0b53D9277642d899DF5C87A3966A349A798F224&amountUSD=50000"
+
+# Is this pool being sandwiched?
+curl "http://localhost:3402/v1/defi/sandwich-activity?pool=0xd0b53D9277642d899DF5C87A3966A349A798F224"
+
+# What's the predicted impermanent loss?
+curl "http://localhost:3402/v1/defi/il-risk?pool=0xd0b53D9277642d899DF5C87A3966A349A798F224&timeframeHours=24"
 ```
 
 ### Example Response — Oracle Health
@@ -153,13 +162,13 @@ vigil/
 
 - [x] Oracle Health Monitor — 8 Chainlink feeds on Base, live deviation + staleness tracking
 - [x] Liquidation Cascade Predictor — Aave V3 position indexing + cascade simulation
+- [x] MEV Exposure Score — per-pool MEV risk scoring with price impact estimation
+- [x] Sandwich Detection — block-level frontrun-victim-backrun pattern detection
+- [x] IL Risk Prediction — statistical volatility model for impermanent loss prediction
 - [x] x402 paywall middleware — pay-per-request USDC on Base
 
 ## What's Coming
 
-- [ ] MEV Exposure Score — per-pool sandwich risk scoring from on-chain swap analysis
-- [ ] Real-time Sandwich Detection — block-level frontrun-victim-backrun pattern detection
-- [ ] Predictive IL Risk — statistical volatility models for impermanent loss prediction
 - [ ] MCP Server — expose all feeds as MCP tools for AI agent frameworks
 - [ ] Agent Service Price Oracle — cross-registry price comparison for agent services (the one gap nobody is building)
 - [ ] Background workers — continuous Chainlink polling + Aave position indexing
