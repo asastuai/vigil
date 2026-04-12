@@ -12,5 +12,11 @@ export {
   fetchPositions,
   simulateCascade,
 } from "./feeds/liquidation.js";
+export { getMevExposure } from "./feeds/mev-exposure.js";
+export type { MevExposureResponse } from "./feeds/mev-exposure.js";
+export { getSandwichActivity } from "./feeds/sandwich.js";
+export type { SandwichActivityResponse } from "./feeds/sandwich.js";
+export { getIlRisk } from "./feeds/il-risk.js";
+export type { IlRiskResponse } from "./feeds/il-risk.js";
 export * from "./types/defi.js";
-export { CHAINLINK_FEEDS } from "./chains/contracts.js";
+export { CHAINLINK_FEEDS, BASE_POOLS } from "./chains/contracts.js";

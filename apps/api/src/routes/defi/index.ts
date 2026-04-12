@@ -5,6 +5,10 @@ import {
   getAllOracleHealth,
   getAvailableFeeds,
   getLiquidationRisk,
+  getMevExposure,
+  getSandwichActivity,
+  getIlRisk,
+  BASE_POOLS,
 } from "@vigil/core";
 
 export function defiRoutes(client: BaseClient) {
@@ -92,6 +96,108 @@ export function defiRoutes(client: BaseClient) {
         protocol,
         asset,
         priceDropPct
+      );
+      return c.json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      return c.json({ error: message }, 400);
+    }
+  });
+
+  // MEV Exposure Score
+  // x402: $0.005 per request
+  router.get("/mev-exposure", async (c) => {
+    const pool = c.req.query("pool");
+    const amountStr = c.req.query("amountUSD");
+
+    if (!pool || !amountStr) {
+      return c.json(
+        {
+          error: "Missing required query parameters: pool, amountUSD",
+          example:
+            "/v1/defi/mev-exposure?pool=0xd0b53D9277642d899DF5C87A3966A349A798F224&amountUSD=50000",
+          knownPools: BASE_POOLS,
+        },
+        400
+      );
+    }
+
+    const amountUSD = Number(amountStr);
+    if (isNaN(amountUSD) || amountUSD <= 0) {
+      return c.json({ error: "amountUSD must be a positive number" }, 400);
+    }
+
+    try {
+      const result = await getMevExposure(
+        client,
+        pool as `0x${string}`,
+        amountUSD
+      );
+      return c.json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      return c.json({ error: message }, 400);
+    }
+  });
+
+  // Sandwich Activity Detection
+  // x402: $0.005 per request
+  router.get("/sandwich-activity", async (c) => {
+    const pool = c.req.query("pool");
+    const blocksStr = c.req.query("lookbackBlocks");
+
+    if (!pool) {
+      return c.json(
+        {
+          error: "Missing required query parameter: pool",
+          example:
+            "/v1/defi/sandwich-activity?pool=0xd0b53D9277642d899DF5C87A3966A349A798F224",
+          knownPools: BASE_POOLS,
+        },
+        400
+      );
+    }
+
+    const lookbackBlocks = blocksStr ? BigInt(blocksStr) : 5_000n;
+
+    try {
+      const result = await getSandwichActivity(
+        client,
+        pool as `0x${string}`,
+        lookbackBlocks
+      );
+      return c.json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      return c.json({ error: message }, 400);
+    }
+  });
+
+  // IL Risk Prediction
+  // x402: $0.01 per request
+  router.get("/il-risk", async (c) => {
+    const pool = c.req.query("pool");
+    const hoursStr = c.req.query("timeframeHours");
+
+    if (!pool) {
+      return c.json(
+        {
+          error: "Missing required query parameter: pool",
+          example:
+            "/v1/defi/il-risk?pool=0xd0b53D9277642d899DF5C87A3966A349A798F224&timeframeHours=24",
+          knownPools: BASE_POOLS,
+        },
+        400
+      );
+    }
+
+    const timeframeHours = hoursStr ? Number(hoursStr) : 24;
+
+    try {
+      const result = await getIlRisk(
+        client,
+        pool as `0x${string}`,
+        timeframeHours
       );
       return c.json(result);
     } catch (err) {

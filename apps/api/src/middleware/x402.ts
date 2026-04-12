@@ -40,6 +40,36 @@ export const x402Routes: RoutesConfig = {
     },
     description: "Simulate liquidation cascades for a given price drop scenario",
   },
+  "GET /v1/defi/mev-exposure": {
+    accepts: {
+      scheme: "exact",
+      network: BASE_NETWORK,
+      payTo: PAYEE_ADDRESS,
+      price: "$0.005",
+      maxTimeoutSeconds: 60,
+    },
+    description: "MEV exposure score for a pool given a trade size",
+  },
+  "GET /v1/defi/sandwich-activity": {
+    accepts: {
+      scheme: "exact",
+      network: BASE_NETWORK,
+      payTo: PAYEE_ADDRESS,
+      price: "$0.005",
+      maxTimeoutSeconds: 60,
+    },
+    description: "Real-time sandwich attack detection for a pool",
+  },
+  "GET /v1/defi/il-risk": {
+    accepts: {
+      scheme: "exact",
+      network: BASE_NETWORK,
+      payTo: PAYEE_ADDRESS,
+      price: "$0.01",
+      maxTimeoutSeconds: 60,
+    },
+    description: "Predictive impermanent loss risk for a pool",
+  },
 };
 
 // Create facilitator client

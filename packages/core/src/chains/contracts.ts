@@ -153,3 +153,126 @@ export const AAVE_POOL_EVENTS_ABI = [
     type: "event",
   },
 ] as const;
+
+// ============================================================
+// DEX Pool ABIs and Addresses (Uniswap V3 + Aerodrome on Base)
+// ============================================================
+
+// Uniswap V3 Swap event
+export const UNISWAP_V3_SWAP_EVENT_ABI = [
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "sender", type: "address" },
+      { indexed: true, name: "recipient", type: "address" },
+      { indexed: false, name: "amount0", type: "int256" },
+      { indexed: false, name: "amount1", type: "int256" },
+      { indexed: false, name: "sqrtPriceX96", type: "uint160" },
+      { indexed: false, name: "liquidity", type: "uint128" },
+      { indexed: false, name: "tick", type: "int24" },
+    ],
+    name: "Swap",
+    type: "event",
+  },
+] as const;
+
+// Uniswap V3 Pool read functions
+export const UNISWAP_V3_POOL_ABI = [
+  {
+    inputs: [],
+    name: "slot0",
+    outputs: [
+      { name: "sqrtPriceX96", type: "uint160" },
+      { name: "tick", type: "int24" },
+      { name: "observationIndex", type: "uint16" },
+      { name: "observationCardinality", type: "uint16" },
+      { name: "observationCardinalityNext", type: "uint16" },
+      { name: "feeProtocol", type: "uint8" },
+      { name: "unlocked", type: "bool" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "liquidity",
+    outputs: [{ name: "", type: "uint128" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "fee",
+    outputs: [{ name: "", type: "uint24" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "token0",
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "token1",
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const;
+
+// Aerodrome V2 Pool read functions
+export const AERODROME_POOL_ABI = [
+  {
+    inputs: [],
+    name: "getReserves",
+    outputs: [
+      { name: "_reserve0", type: "uint256" },
+      { name: "_reserve1", type: "uint256" },
+      { name: "_blockTimestampLast", type: "uint256" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "token0",
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "token1",
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const;
+
+// ERC20 minimal ABI
+export const ERC20_ABI = [
+  {
+    inputs: [],
+    name: "decimals",
+    outputs: [{ name: "", type: "uint8" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "symbol",
+    outputs: [{ name: "", type: "string" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const;
+
+// Major pool addresses on Base
+export const BASE_POOLS = {
+  "WETH/USDC-V3-500": "0xd0b53D9277642d899DF5C87A3966A349A798F224" as const,
+  "WETH/USDC-V3-3000": "0x4C36388bE6F416A29C8d8Ae5C112AB4cc73c0E16" as const,
+  "WETH/USDC-AERO": "0xcDAC0d6c6C59727a65F871236188350531885C43" as const,
+} as const;
