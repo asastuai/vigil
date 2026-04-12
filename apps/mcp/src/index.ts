@@ -11,7 +11,12 @@ import {
   getSandwichActivity,
   getIlRisk,
   BASE_POOLS,
+  listCapabilities,
+  resolveCapability,
+  buildServicePriceResponse,
+  type AgentService,
 } from "@vigil/core";
+import { tryCreateSupabaseClient, queryAgentServices } from "@vigil/db";
 
 const client = createBaseClient(process.env.BASE_RPC_URL);
 
@@ -155,6 +160,79 @@ server.tool(
             null,
             2
           ),
+        },
+      ],
+    };
+  }
+);
+
+// Tool: query_service_prices
+const db = tryCreateSupabaseClient();
+
+server.tool(
+  "query_service_prices",
+  "Compare prices across AI agent services for a given capability. Returns providers sorted by price with value scores. Use this to find the cheapest or best-value service before paying.",
+  {
+    capability: z
+      .string()
+      .describe(
+        'Service capability to search (e.g. "text-generation", "image-generation", "defi-intelligence"). Use list_capabilities to see all options.'
+      ),
+  },
+  async ({ capability }) => {
+    const resolved = resolveCapability(capability);
+    if (!resolved) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify({
+              error: `Unknown capability: "${capability}"`,
+              available: listCapabilities(),
+            }),
+          },
+        ],
+      };
+    }
+
+    let services: AgentService[] = [];
+    if (db) {
+      const { data } = await queryAgentServices(db, resolved);
+      if (data) {
+        services = data.map((row: Record<string, unknown>) => ({
+          providerName: row.provider_name as string,
+          providerUrl: row.provider_url as string | null,
+          capability: row.capability as string,
+          priceUSD: Number(row.price_usd),
+          pricingUnit: row.pricing_unit as string,
+          registrySource: row.registry_source as string,
+          reputationScore: row.reputation_score as number | null,
+          latencyP50Ms: row.latency_p50_ms as number | null,
+          uptime30d: row.uptime_30d as number | null,
+          valueScore: 0,
+          lastVerified: row.last_verified as string,
+        }));
+      }
+    }
+
+    const response = buildServicePriceResponse(resolved, services);
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(response, null, 2) }],
+    };
+  }
+);
+
+// Tool: list_capabilities
+server.tool(
+  "list_service_capabilities",
+  "List all known agent service capability categories and their aliases.",
+  {},
+  async () => {
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify({ capabilities: listCapabilities() }, null, 2),
         },
       ],
     };

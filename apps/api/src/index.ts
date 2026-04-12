@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 import { createBaseClient } from "@vigil/core";
 import { defiRoutes } from "./routes/defi/index.js";
+import { oracleRoutes } from "./routes/oracle/index.js";
 import { createX402Middleware } from "./middleware/x402.js";
 
 const app = new Hono();
@@ -26,17 +27,31 @@ app.get("/", (c) => {
     version: "0.1.0",
     description: "DeFi Hard Intelligence Feeds for AI Agents",
     endpoints: {
-      health: "GET /",
-      oracleHealth: "GET /v1/defi/oracle-health?pair=ETH/USD",
-      oracleHealthAll: "GET /v1/defi/oracle-health/all",
-      liquidationRisk: "GET /v1/defi/liquidation-risk?protocol=aave-v3&asset=ETH&priceDropPct=10",
-      availableFeeds: "GET /v1/defi/feeds",
+      defi: {
+        oracleHealth: "GET /v1/defi/oracle-health?pair=ETH/USD",
+        liquidationRisk: "GET /v1/defi/liquidation-risk?protocol=aave-v3&asset=ETH&priceDropPct=10",
+        mevExposure: "GET /v1/defi/mev-exposure?pool=0x...&amountUSD=50000",
+        sandwichActivity: "GET /v1/defi/sandwich-activity?pool=0x...",
+        ilRisk: "GET /v1/defi/il-risk?pool=0x...&timeframeHours=24",
+        feeds: "GET /v1/defi/feeds",
+      },
+      oracle: {
+        servicePrice: "GET /v1/oracle/service-price?capability=text-generation",
+        serviceCompare: "GET /v1/oracle/service-compare?capability=...&providers=A,B",
+        capabilities: "GET /v1/oracle/capabilities",
+        register: "POST /v1/oracle/register",
+      },
     },
     payment: "x402 (USDC on Base)",
     pricing: {
       "oracle-health": "$0.001/req",
       "oracle-health/all": "$0.005/req",
       "liquidation-risk": "$0.01/req",
+      "mev-exposure": "$0.005/req",
+      "sandwich-activity": "$0.005/req",
+      "il-risk": "$0.01/req",
+      "service-price": "$0.005/req",
+      "service-compare": "$0.005/req",
     },
   });
 });
@@ -44,8 +59,9 @@ app.get("/", (c) => {
 // Create shared viem client
 const baseClient = createBaseClient(process.env.BASE_RPC_URL);
 
-// Mount DeFi routes
+// Mount routes
 app.route("/v1/defi", defiRoutes(baseClient));
+app.route("/v1/oracle", oracleRoutes());
 
 // Start server
 const port = Number(process.env.PORT) || 3402;

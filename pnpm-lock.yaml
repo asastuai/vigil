@@ -54,6 +54,9 @@ importers:
       '@vigil/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@vigil/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       zod:
         specifier: ^4.3.6
         version: 4.3.6

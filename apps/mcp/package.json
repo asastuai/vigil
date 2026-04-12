@@ -12,6 +12,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@vigil/core": "workspace:*",
+    "@vigil/db": "workspace:*",
     "zod": "^4.3.6"
   },
   "devDependencies": {
