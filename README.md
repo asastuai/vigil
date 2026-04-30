@@ -34,7 +34,7 @@ Every endpoint is monetized via x402. No API keys. No accounts. No subscriptions
 
 ---
 
-## How it ties into Proof-of-Context
+## ◊ How it ties into Proof-of-Context
 
 PoC is a verification primitive that binds attestations to a freshness horizon and gates settlement against it. Vigil is a producer of `f_i`-typed PoC commitments for risk and MEV signals.
 
@@ -190,7 +190,7 @@ If `POC_SIGNING_KEY` is unset, attestations are returned without signatures (sti
 
 ---
 
-## Part of Aletheia
+## ❖ Part of Aletheia
 
 Vigil is a data layer of [Aletheia](https://github.com/asastuai/aletheia). Five sibling repos compose the rest of the stack.
 
