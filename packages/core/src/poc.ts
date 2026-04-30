@@ -20,6 +20,7 @@
 
 import { signAsync, verifyAsync, getPublicKeyAsync, etc } from '@noble/ed25519';
 import { sha512, sha256 } from '@noble/hashes/sha2';
+import { buildAnchors } from './poc-anchors.js';
 
 // noble/ed25519 v2.x: wire sha512 via the etc namespace.
 etc.sha512Async = async (...m: Uint8Array[]) =>
@@ -130,6 +131,11 @@ export async function attest<T extends Record<string, unknown>>(
     publicKeyHex = await getPublicKey();
   }
 
+  // Triple-anchor: best-effort fetch of block_height + drand_round when
+  // POC_ENABLE_TRIPLE_ANCHOR is set. Otherwise null. See poc-anchors.ts.
+  const anchors = await buildAnchors();
+  anchors.server_timestamp = timestamp;
+
   return {
     ...payload,
     _poc: {
@@ -142,11 +148,7 @@ export async function attest<T extends Record<string, unknown>>(
       payload_hash: payloadHash,
       signature: signatureHex,
       public_key: publicKeyHex,
-      anchors: {
-        server_timestamp: timestamp,
-        block_height: null,
-        drand_round: null,
-      },
+      anchors,
       scope_disclaimer:
         'Operator vouches for freshness at timestamp of signing. Upstream Chainlink / Aave / Uniswap source honesty is not attested.',
     },
