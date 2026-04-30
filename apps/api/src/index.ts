@@ -5,11 +5,33 @@ import { createBaseClient, getPublicKey } from "@vigil/core";
 import { defiRoutes } from "./routes/defi/index.js";
 import { oracleRoutes } from "./routes/oracle/index.js";
 import { createX402Middleware } from "./middleware/x402.js";
+import { rateLimit } from "./middleware/rate-limit.js";
 
 const app = new Hono();
 
-// Global middleware
-app.use("*", cors());
+// CORS — restrict to known origins via CORS_ALLOWED_ORIGINS env var.
+const corsAllowlist = (process.env.CORS_ALLOWED_ORIGINS ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+if (corsAllowlist.length > 0) {
+  app.use(
+    "*",
+    cors({
+      origin: (origin) => {
+        if (!origin || corsAllowlist.includes(origin)) return origin ?? "*";
+        return null;
+      },
+    })
+  );
+} else {
+  app.use("*", cors());
+}
+
+// Rate limit free endpoints. Paid endpoints self-rate via x402 cost.
+app.use("/", rateLimit());
+app.use("/v1/poc/public-key", rateLimit());
+app.use("/v1/defi/feeds", rateLimit());
 
 // x402 payment middleware — gates paid routes, passes through free ones
 // Only activate when payee address is configured
