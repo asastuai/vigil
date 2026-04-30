@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
-import { createBaseClient } from "@vigil/core";
+import { createBaseClient, getPublicKey } from "@vigil/core";
 import { defiRoutes } from "./routes/defi/index.js";
 import { oracleRoutes } from "./routes/oracle/index.js";
 import { createX402Middleware } from "./middleware/x402.js";
@@ -53,6 +53,23 @@ app.get("/", (c) => {
       "service-price": "$0.005/req",
       "service-compare": "$0.005/req",
     },
+  });
+});
+
+// PoC operator public key — consumers fetch this to verify Vigil attestations
+app.get("/v1/poc/public-key", async (c) => {
+  const publicKey = await getPublicKey();
+  return c.json({
+    public_key: publicKey,
+    source_id: process.env.POC_SOURCE_ID ?? "vigil:default",
+    primitive: "Proof-of-Context (Aletheia)",
+    spec: "https://github.com/asastuai/proof-of-context",
+    impl: "https://github.com/asastuai/proof-of-context-impl",
+    freshness_types_emitted: ["f_i"],
+    note:
+      publicKey === null
+        ? "POC_SIGNING_KEY env var not set. Attestations will be unsigned (still informational)."
+        : "Attestations are Ed25519-signed. Verify against this public key.",
   });
 });
 

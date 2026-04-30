@@ -9,7 +9,22 @@ import {
   getSandwichActivity,
   getIlRisk,
   BASE_POOLS,
+  attest,
 } from "@vigil/core";
+
+/**
+ * Per-feed freshness horizon (seconds). Calibrated to the volatility of each
+ * signal. Oracle health: short (price-sensitive). Liquidation cascade: medium
+ * (state moves slower than price). MEV / sandwich: short (block-by-block).
+ * IL risk: medium (statistical baseline updates per block).
+ */
+const HORIZON = {
+  ORACLE_HEALTH: 30,
+  LIQUIDATION: 60,
+  MEV_EXPOSURE: 30,
+  SANDWICH: 30,
+  IL_RISK: 60,
+} as const;
 
 export function defiRoutes(client: BaseClient) {
   const router = new Hono();
@@ -39,7 +54,12 @@ export function defiRoutes(client: BaseClient) {
 
     try {
       const result = await getOracleHealth(client, pair);
-      return c.json(result);
+      const attested = await attest(result as unknown as Record<string, unknown>, {
+        endpoint: "/v1/defi/oracle-health",
+        freshnessHorizonSeconds: HORIZON.ORACLE_HEALTH,
+        freshnessType: "f_i",
+      });
+      return c.json(attested);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return c.json({ error: message }, 400);
@@ -51,11 +71,15 @@ export function defiRoutes(client: BaseClient) {
   router.get("/oracle-health/all", async (c) => {
     try {
       const results = await getAllOracleHealth(client);
-      return c.json({
-        feeds: results,
-        count: results.length,
-        timestamp: new Date().toISOString(),
-      });
+      const attested = await attest(
+        { feeds: results, count: results.length },
+        {
+          endpoint: "/v1/defi/oracle-health/all",
+          freshnessHorizonSeconds: HORIZON.ORACLE_HEALTH,
+          freshnessType: "f_i",
+        }
+      );
+      return c.json(attested);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return c.json({ error: message }, 500);
@@ -97,7 +121,12 @@ export function defiRoutes(client: BaseClient) {
         asset,
         priceDropPct
       );
-      return c.json(result);
+      const attested = await attest(result as unknown as Record<string, unknown>, {
+        endpoint: "/v1/defi/liquidation-risk",
+        freshnessHorizonSeconds: HORIZON.LIQUIDATION,
+        freshnessType: "f_i",
+      });
+      return c.json(attested);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return c.json({ error: message }, 400);
@@ -133,7 +162,12 @@ export function defiRoutes(client: BaseClient) {
         pool as `0x${string}`,
         amountUSD
       );
-      return c.json(result);
+      const attested = await attest(result as unknown as Record<string, unknown>, {
+        endpoint: "/v1/defi/mev-exposure",
+        freshnessHorizonSeconds: HORIZON.MEV_EXPOSURE,
+        freshnessType: "f_i",
+      });
+      return c.json(attested);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return c.json({ error: message }, 400);
@@ -166,7 +200,12 @@ export function defiRoutes(client: BaseClient) {
         pool as `0x${string}`,
         lookbackBlocks
       );
-      return c.json(result);
+      const attested = await attest(result as unknown as Record<string, unknown>, {
+        endpoint: "/v1/defi/sandwich-activity",
+        freshnessHorizonSeconds: HORIZON.SANDWICH,
+        freshnessType: "f_i",
+      });
+      return c.json(attested);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return c.json({ error: message }, 400);
@@ -199,7 +238,12 @@ export function defiRoutes(client: BaseClient) {
         pool as `0x${string}`,
         timeframeHours
       );
-      return c.json(result);
+      const attested = await attest(result as unknown as Record<string, unknown>, {
+        endpoint: "/v1/defi/il-risk",
+        freshnessHorizonSeconds: HORIZON.IL_RISK,
+        freshnessType: "f_i",
+      });
+      return c.json(attested);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return c.json({ error: message }, 400);

@@ -33,3 +33,13 @@ export type {
   ServicePriceResponse,
   ServiceCompareResponse,
 } from "./oracle/price-oracle.js";
+
+// Proof-of-Context attestation primitive.
+// Part of the Aletheia stack: github.com/asastuai/aletheia
+export { attest, verify, getPublicKey } from "./poc.js";
+export type {
+  PocBlock,
+  AttestOptions,
+  VerifyOptions,
+  PocVerdict,
+} from "./poc.js";

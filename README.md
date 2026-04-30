@@ -1,42 +1,66 @@
+<div align="center">
+
 # Vigil
 
-**DeFi intelligence that AI agents can actually use.**
+### DeFi intelligence that AI agents can actually use. Hard signals, x402-monetized, every response carries a PoC `f_i` attestation.
+
+[![Base L2](https://img.shields.io/badge/Base-L2-0052FF.svg)](https://base.org)
+[![x402](https://img.shields.io/badge/payments-x402-brightgreen.svg)](https://www.x402.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+*Part of [**Aletheia**](https://github.com/asastuai/aletheia). Full stack for the agentic economics.*
+
+</div>
 
 ---
 
-Everyone's building payment rails for agents. x402 is live. AgentKit exists. Wallets, policies, settlement — all solved.
+## What it is
 
-But here's the thing nobody's talking about: **agents still can't make smart DeFi decisions.** They have wallets, sure. They can pay. But they're blind. They're swapping into sandwiched pools, trusting stale oracles, and ignoring liquidation cascades that are about to wipe the floor.
+Everyone is building payment rails for agents. x402 is live. AgentKit exists. Wallets, policies, settlement, all solved.
 
-Vigil fixes that.
+Here is the thing nobody is solving: agents still cannot make smart DeFi decisions. They have wallets. They can pay. But they are blind. They are swapping into sandwiched pools, trusting stale oracles, and ignoring liquidation cascades that are about to wipe the floor.
 
-## What is this
-
-Vigil is a set of **hard DeFi intelligence feeds** — the kind of signals that Chaos Labs and Gauntlet compute internally for their $9B+ clients, but nobody exposes as an API.
-
-We're not wrapping DeFiLlama. We're not reselling CoinGecko. We're computing things that don't exist anywhere else as a consumable service:
+Vigil is a set of hard DeFi intelligence feeds. The kind of signals that Chaos Labs and Gauntlet compute internally for their $9B+ clients but nobody exposes as an API. Each response carries a Proof-of-Context attestation typed as input freshness (`f_i`). A consumer that integrates the attestation can refuse to settle downstream computation if the signal drifted past the protocol-defined horizon.
 
 | Signal | What it tells you | Who else does this |
-|--------|------------------|--------------------|
-| **Oracle Health Monitor** | Is this Chainlink feed stale? Deviating from spot? Is the L2 sequencer even up? | Chaos Labs (B2B only, no public API) |
-| **Liquidation Cascade Predictor** | If ETH drops 10%, how many positions liquidate? What's the cascade depth? | Gauntlet (B2B only, no public API) |
-| **MEV Exposure Score** | What's the sandwich risk for this pool right now? | Nobody |
+|---|---|---|
+| **Oracle Health Monitor** | Is this Chainlink feed stale? Deviating from spot? Is the L2 sequencer up? | Chaos Labs (B2B only, no public API) |
+| **Liquidation Cascade Predictor** | If ETH drops 10%, how many positions liquidate? What is the cascade depth? | Gauntlet (B2B only, no public API) |
+| **MEV Exposure Score** | What is the sandwich risk for this pool right now? | Nobody |
 | **Real-time Sandwich Detection** | Is this pool being actively sandwiched? | Nobody |
-| **Predictive IL Risk** | What's the projected impermanent loss for this pool? | Nobody |
+| **Predictive IL Risk** | What is the projected impermanent loss for this pool? | Nobody |
 
-Every endpoint is monetized via [x402](https://x402.org) — the HTTP payment protocol. No API keys. No accounts. No subscriptions. An agent just pays per-request in USDC on Base and gets the data. That's it.
+Every endpoint is monetized via x402. No API keys. No accounts. No subscriptions. The agent pays per request in USDC on Base and gets the data plus the PoC attestation.
+
+---
+
+## How it ties into Proof-of-Context
+
+PoC is a verification primitive that binds attestations to a freshness horizon and gates settlement against it. Vigil is a producer of `f_i`-typed PoC commitments for risk and MEV signals.
+
+Two concrete surfaces.
+
+**1. Risk signals are PoC-attested.** When an agent queries `/v1/defi/oracle-health?pair=ETH/USD`, the response includes the staleness data plus an attestation: `(measurement_block, source_id, sequencer_status, signature)`. The consumer can verify the attestation chain and check whether the signal is within their freshness horizon.
+
+**2. MEV exposure scores carry timing context.** A sandwich-risk score from 30 seconds ago and one from 2 seconds ago are not the same signal economically. The PoC commitment makes that timing explicit. The consumer's downstream settlement gate refuses to clear if the signal aged past horizon.
+
+The economic stakes for `f_i` on risk signals are high. $289M lost to sandwich attacks in 2025. $45M in agent-specific security incidents in 2026. Most from bad data, not bad code. Stale risk signal = silent value leakage.
+
+---
 
 ## Why this matters
 
-McKinsey projects $3-5 trillion in agentic commerce by 2030. The payment infrastructure is ready (140M+ x402 transactions processed). But agents operating in DeFi are flying blind:
+Agents operating in DeFi are flying blind.
 
-- **$289M lost to sandwich attacks in 2025** — agents are ideal targets because their patterns are predictable
-- **$45M in agent-specific security incidents in 2026** — most from bad data, not bad code
-- **An agent sent $250K to a random Twitter account** because it had no risk intelligence layer
+- $289M lost to sandwich attacks in 2025. Agents are ideal targets because their patterns are predictable.
+- $45M in agent-specific security incidents in 2026. Most from bad data, not bad code.
+- An agent sent $250K to a random Twitter account because it had no risk intelligence layer.
 
-The data agents need to make safe DeFi decisions doesn't exist as a service. We're building it.
+The data agents need to make safe DeFi decisions does not exist as a service. Vigil exists to close that gap, with PoC-attested freshness so the consumer can refuse to settle on stale risk.
 
-## Quick Start
+---
+
+## Quick start
 
 ```bash
 git clone https://github.com/asastuai/vigil.git
@@ -45,7 +69,7 @@ pnpm install
 pnpm dev --filter @vigil/api
 ```
 
-Server starts on `http://localhost:3402`. Hit it:
+Server starts on `http://localhost:3402`.
 
 ```bash
 # What feeds are available?
@@ -57,86 +81,53 @@ curl "http://localhost:3402/v1/defi/oracle-health?pair=ETH/USD"
 # What happens if ETH drops 20%?
 curl "http://localhost:3402/v1/defi/liquidation-risk?protocol=aave-v3&asset=ETH&priceDropPct=20"
 
-# What's the MEV risk for a $50K swap on this pool?
+# What is the MEV risk for a $50K swap on this pool?
 curl "http://localhost:3402/v1/defi/mev-exposure?pool=0xd0b53D9277642d899DF5C87A3966A349A798F224&amountUSD=50000"
 
 # Is this pool being sandwiched?
 curl "http://localhost:3402/v1/defi/sandwich-activity?pool=0xd0b53D9277642d899DF5C87A3966A349A798F224"
 
-# What's the predicted impermanent loss?
+# Predicted impermanent loss?
 curl "http://localhost:3402/v1/defi/il-risk?pool=0xd0b53D9277642d899DF5C87A3966A349A798F224&timeframeHours=24"
 ```
 
-### Example Response — Oracle Health
+---
 
-```json
-{
-  "feed": "ETH/USD",
-  "feedAddress": "0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70",
-  "chainlinkPrice": 2213.24,
-  "spotPrice": 2212.93,
-  "deviationPct": 0.014,
-  "lastUpdate": "2026-04-12T04:41:11.000Z",
-  "staleness": 110,
-  "heartbeat": 1200,
-  "stalenessRatio": 0.0917,
-  "status": "healthy",
-  "sequencerUp": true
-}
-```
+## How x402 payments work
 
-### Example Response — Liquidation Risk
-
-```json
-{
-  "protocol": "aave-v3",
-  "chain": "base",
-  "asset": "ETH",
-  "currentPrice": 2213.42,
-  "simulatedPrice": 1549.39,
-  "priceDropPct": 30,
-  "atRiskPositions": 142,
-  "totalCollateralAtRisk": 12500000,
-  "estimatedLiquidationVolume": 8200000,
-  "cascadeDepth": 3,
-  "cascadeRounds": [
-    { "round": 1, "liquidations": 89, "volume": 5100000, "priceImpact": -2.1 },
-    { "round": 2, "liquidations": 38, "volume": 2400000, "priceImpact": -1.3 },
-    { "round": 3, "liquidations": 15, "volume": 700000, "priceImpact": -0.4 }
-  ],
-  "timestamp": "2026-04-12T04:52:09.026Z"
-}
-```
-
-## How x402 Payments Work
-
-When you deploy with a payee address, endpoints are gated by the x402 protocol:
+When deployed with a payee address, endpoints are gated by the x402 protocol.
 
 ```
 Agent → GET /v1/defi/oracle-health?pair=ETH/USD
 Server → 402 Payment Required (price: $0.001 USDC on Base)
 Agent → signs USDC authorization with its wallet
 Agent → retries request with payment proof
-Server → returns data
+Server → returns data + PoC f_i attestation
 ```
 
-No API key. No OAuth. No account creation. The agent pays and gets the data. Total time: ~3 seconds.
+No API key. No OAuth. No account creation. Total time: ~3 seconds.
 
 ```bash
 # Enable x402 paywall
-X402_PAYEE_ADDRESS=0xYourWallet X402_FACILITATOR_URL=https://facilitator.x402.org pnpm dev --filter @vigil/api
+X402_PAYEE_ADDRESS=0xYourWallet \
+X402_FACILITATOR_URL=https://facilitator.x402.org \
+pnpm dev --filter @vigil/api
 ```
 
-### Pricing
+---
 
-| Endpoint | Price |
-|----------|-------|
-| Oracle Health (single feed) | $0.001 |
-| Oracle Health (all feeds) | $0.005 |
-| Liquidation Cascade Simulation | $0.01 |
-| MEV Exposure Score | $0.005 |
-| Sandwich Activity | $0.005 |
-| IL Risk Prediction | $0.01 |
+## Pricing
+
+| Endpoint | Price | PoC type |
+|---|---|---|
+| Oracle Health (single feed) | $0.001 | `f_i` attested |
+| Oracle Health (all feeds) | $0.005 | `f_i` attested |
+| Liquidation Cascade Simulation | $0.01 | `f_i` attested |
+| MEV Exposure Score | $0.005 | `f_i` attested |
+| Sandwich Activity | $0.005 | `f_i` attested |
+| IL Risk Prediction | $0.01 | `f_i` attested |
+
+---
 
 ## Architecture
 
@@ -154,39 +145,64 @@ vigil/
 │   └── workers/        ← Background data pipelines
 ```
 
-**Stack**: TypeScript, Hono, viem, x402, Supabase, Turborepo
+Stack. TypeScript, Hono, viem, x402, Supabase, Turborepo.
 
-**Chain**: Base (primary), reads Chainlink oracles and Aave V3 positions on-chain via multicall.
+Chain. Base (primary). Reads Chainlink oracles and Aave V3 positions on-chain via multicall.
 
-## What's Live
+---
 
-- [x] Oracle Health Monitor — 8 Chainlink feeds on Base, live deviation + staleness tracking
-- [x] Liquidation Cascade Predictor — Aave V3 position indexing + cascade simulation
-- [x] MEV Exposure Score — per-pool MEV risk scoring with price impact estimation
-- [x] Sandwich Detection — block-level frontrun-victim-backrun pattern detection
-- [x] IL Risk Prediction — statistical volatility model for impermanent loss prediction
-- [x] x402 paywall middleware — pay-per-request USDC on Base
+## Tests
 
-## What's Coming
+```bash
+cd packages/core && pnpm test
+```
 
-- [ ] MCP Server — expose all feeds as MCP tools for AI agent frameworks
-- [ ] Agent Service Price Oracle — cross-registry price comparison for agent services (the one gap nobody is building)
-- [ ] Background workers — continuous Chainlink polling + Aave position indexing
-- [ ] Multi-chain — Ethereum, Arbitrum, Optimism
+7 PoC primitive tests passing. Coverage: `f_i` attestation emission, scope_disclaimer validation, fresh signature acceptance, payload tampering rejection, integrator-tighter horizon override, public key derivation, unsigned attestation rejection.
 
-## The Bigger Picture
+---
 
-Vigil isn't just a DeFi data API. It's the first piece of something larger.
+## Generating a PoC signing key
 
-**Phase 1** (now): DeFi intelligence feeds that agents pay for. Prove the model works.
+```bash
+node -e "import('crypto').then(({randomBytes}) => console.log(randomBytes(32).toString('hex')))"
+```
 
-**Phase 2**: MCP server so any AI agent (Claude, GPT, LangChain, CrewAI) can consume these feeds natively.
+Set as `POC_SIGNING_KEY` in `.env`. Publish the public key (returned by `GET /v1/poc/public-key`) so consumers can verify Vigil attestations against your operator identity.
 
-**Phase 3**: Agent Service Price Oracle — the one genuinely empty gap in the entire agentic ecosystem. No protocol (ERC-8004, x402, UCP, HOL, Fetch.ai) offers machine-readable price comparison between equivalent agent services. We're building the Chainlink of service pricing.
+If `POC_SIGNING_KEY` is unset, attestations are returned without signatures (still informational, but not cryptographically bound).
 
-**Phase 4**: Multi-chain expansion + real-time WebSocket feeds + alert subscriptions.
+---
 
-## Environment Variables
+## Status
+
+| What runs | What is missing |
+|---|---|
+| 5 risk feeds live (Oracle Health, Liquidation Cascade, MEV Exposure, Sandwich Detection, IL Risk). x402 paywall middleware working. Indexed on Base. **All 6 paid endpoints emit Ed25519-signed PoC `f_i` attestations.** 7 tests passing in core package. `/v1/poc/public-key` published. | Triple-anchor `block_height` + `drand_round` wiring. MCP server (Phase 2). Multi-chain expansion. Real-time WebSocket feeds. |
+
+---
+
+## What is coming
+
+- MCP Server. Expose all feeds as MCP tools for AI agent frameworks.
+- Agent Service Price Oracle. Cross-registry price comparison for agent services. The one gap nobody is building.
+- Background workers. Continuous Chainlink polling + Aave position indexing.
+- Multi-chain. Ethereum, Arbitrum, Optimism.
+
+---
+
+## Part of Aletheia
+
+Vigil is a data layer of [Aletheia](https://github.com/asastuai/aletheia). Five sibling repos compose the rest of the stack.
+
+- [**Proof-of-Context**](https://github.com/asastuai/proof-of-context) — verification spine. The primitive that types Vigil's response attestations.
+- [**SUR Protocol**](https://github.com/asastuai/sur-protocol) — perp DEX. Consumer of Vigil signals for agent trading risk decisions.
+- [**TrustLayer**](https://github.com/asastuai/TrustLayer) — agent reputation. Aggregates PoC commitments from Vigil queries into reputation history.
+- [**PayClaw**](https://github.com/asastuai/payclaw) — agent wallet. Holds the USDC an agent spends on Vigil queries.
+- [**BaseOracle**](https://github.com/asastuai/BaseOracle) — pay-per-query market data. Sibling data layer for price and trend signals.
+
+---
+
+## Environment variables
 
 ```env
 # Base RPC (defaults to public endpoint, use Alchemy/QuickNode for production)
@@ -195,19 +211,17 @@ BASE_RPC_URL=https://mainnet.base.org
 # Server port
 PORT=3402
 
-# x402 — set these to enable paid endpoints
+# x402 — enable paid endpoints
 X402_PAYEE_ADDRESS=0xYourUSDCReceivingWalletOnBase
 X402_FACILITATOR_URL=https://facilitator.x402.org
 ```
 
-## Contributing
-
-This is early. If you're building AI agents that interact with DeFi and you're tired of flying blind — open an issue, share what signals you need. We're building what the ecosystem actually lacks, not another wrapper around existing APIs.
+---
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).
 
 ---
 
-Built by [@asastuai](https://github.com/asastuai) because agents deserve better data.
+Built by [Juan Cruz Maisu](https://github.com/asastuai). Buenos Aires, Argentina.
