@@ -194,11 +194,11 @@ If `POC_SIGNING_KEY` is unset, attestations are returned without signatures (sti
 
 Vigil is a data layer of [Aletheia](https://github.com/asastuai/aletheia). Five sibling repos compose the rest of the stack.
 
-- [**Proof-of-Context**](https://github.com/asastuai/proof-of-context) — verification spine. The primitive that types Vigil's response attestations.
-- [**SUR Protocol**](https://github.com/asastuai/sur-protocol) — perp DEX. Consumer of Vigil signals for agent trading risk decisions.
-- [**TrustLayer**](https://github.com/asastuai/TrustLayer) — agent reputation. Aggregates PoC commitments from Vigil queries into reputation history.
-- [**PayClaw**](https://github.com/asastuai/payclaw) — agent wallet. Holds the USDC an agent spends on Vigil queries.
-- [**BaseOracle**](https://github.com/asastuai/BaseOracle) — pay-per-query market data. Sibling data layer for price and trend signals.
+- [**Proof-of-Context**](https://github.com/asastuai/proof-of-context): verification spine. The primitive that types Vigil's response attestations.
+- [**SUR Protocol**](https://github.com/asastuai/sur-protocol): perp DEX. Consumer of Vigil signals for agent trading risk decisions.
+- [**TrustLayer**](https://github.com/asastuai/TrustLayer): agent reputation. Aggregates PoC commitments from Vigil queries into reputation history.
+- [**PayClaw**](https://github.com/asastuai/payclaw): agent wallet. Holds the USDC an agent spends on Vigil queries.
+- [**BaseOracle**](https://github.com/asastuai/BaseOracle): pay-per-query market data. Sibling data layer for price and trend signals.
 
 ---
 
@@ -211,7 +211,7 @@ BASE_RPC_URL=https://mainnet.base.org
 # Server port
 PORT=3402
 
-# x402 — enable paid endpoints
+# x402 (enable paid endpoints)
 X402_PAYEE_ADDRESS=0xYourUSDCReceivingWalletOnBase
 X402_FACILITATOR_URL=https://facilitator.x402.org
 ```
@@ -220,8 +220,10 @@ X402_FACILITATOR_URL=https://facilitator.x402.org
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. Please see [LICENSE](LICENSE).
 
 ---
 
 Built by [Juan Cruz Maisu](https://github.com/asastuai). Buenos Aires, Argentina.
+
+Juan Cruz Maisú ♥
