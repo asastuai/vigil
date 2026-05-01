@@ -36,7 +36,7 @@ export type {
 
 // Proof-of-Context attestation primitive.
 // Part of the Aletheia stack: github.com/asastuai/aletheia
-export { attest, verify, getPublicKey } from "./poc.js";
+export { attest, verify, getPublicKey, canonicalHash } from "./poc.js";
 export type {
   PocBlock,
   AttestOptions,
