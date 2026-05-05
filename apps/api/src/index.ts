@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { createBaseClient, getPublicKey } from "@vigil/core";
 import { defiRoutes } from "./routes/defi/index.js";
 import { oracleRoutes } from "./routes/oracle/index.js";
@@ -32,6 +33,12 @@ if (corsAllowlist.length > 0) {
 app.use("/", rateLimit());
 app.use("/v1/poc/public-key", rateLimit());
 app.use("/v1/defi/feeds", rateLimit());
+
+// Bazaar discovery manifests served as static files. These three paths let
+// agentic.market's indexer + crawlers discover what this service offers.
+app.use("/services.json", serveStatic({ path: "./public/services.json" }));
+app.use("/llms.txt", serveStatic({ path: "./public/llms.txt" }));
+app.use("/.well-known/ai-plugin.json", serveStatic({ path: "./public/.well-known/ai-plugin.json" }));
 
 // x402 payment middleware — gates paid routes, passes through free ones
 // Only activate when payee address is configured

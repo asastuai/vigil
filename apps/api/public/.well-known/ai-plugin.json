@@ -1,0 +1,19 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Vigil",
+  "name_for_model": "vigil",
+  "description_for_human": "DeFi hard intelligence feeds for AI agents. Six paid risk signals on Base. Every paid response carries a Proof-of-Context attestation.",
+  "description_for_model": "Vigil exposes six paid risk-intelligence endpoints designed for AI agents that trade DeFi: oracle health (Chainlink staleness, deviation, sequencer status), liquidation cascade simulation (Aave V3), MEV exposure score per pool/trade-size, real-time sandwich activity detection, and predictive impermanent-loss risk for LP positions. All paid endpoints are x402-native on Base L2 (USDC). Every response is wrapped with an Ed25519-signed Proof-of-Context attestation typed as f_i (input freshness) with a declared per-feed horizon. A consumer that integrates the attestation can refuse to settle downstream computation if the signal drifted past horizon. Service catalog at https://vigil-production.up.railway.app/services.json.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "x402",
+    "url": "https://vigil-production.up.railway.app/services.json",
+    "x402_version": 2,
+    "network": "eip155:8453",
+    "asset": "USDC"
+  },
+  "contact_email": "juancmaisu@outlook.com",
+  "legal_info_url": "https://github.com/asastuai/vigil/blob/master/LICENSE"
+}

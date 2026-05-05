@@ -72,9 +72,12 @@ export const x402Routes: RoutesConfig = {
   },
 };
 
-// Create facilitator client
+// Create facilitator client.
+// Default to Coinbase CDP Facilitator so Bazaar / agentic.market can index
+// activity automatically. Operators may override with X402_FACILITATOR_URL
+// to run a self-hosted facilitator if needed.
 const facilitatorUrl =
-  process.env.X402_FACILITATOR_URL || "https://facilitator.x402.org";
+  process.env.X402_FACILITATOR_URL || "https://api.cdp.coinbase.com/platform/v2/x402";
 
 const facilitator = new HTTPFacilitatorClient({ url: facilitatorUrl });
 

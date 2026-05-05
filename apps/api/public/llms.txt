@@ -1,0 +1,38 @@
+# Vigil
+
+> DeFi hard intelligence feeds for AI agents. Six paid risk signals on Base. Every paid response carries a Proof-of-Context `f_i` attestation.
+
+Vigil is the DeFi intelligence layer of the [Aletheia](https://github.com/asastuai/aletheia) stack. Agents that trade DeFi need risk signals that generic price feeds do not provide: oracle health, liquidation cascade prediction, MEV exposure, sandwich-attack detection, impermanent-loss forecasts. These are the signals Chaos Labs and Gauntlet compute internally for institutional clients; Vigil exposes them as x402-paid endpoints with cryptographic attestation.
+
+Every paid response carries an Ed25519-signed `f_i` (input freshness) PoC attestation. A consumer that integrates the attestation can refuse to settle downstream computation if the signal drifted past the protocol-defined freshness horizon.
+
+## Service manifest
+
+For machine-readable endpoint, pricing, and metadata, please see [`/services.json`](https://vigil-production.up.railway.app/services.json).
+
+## Payment
+
+All paid endpoints are x402 over USDC on Base L2. No accounts. No API keys. No subscriptions. The agent pays per request, gets the response, and verifies the PoC attestation against the operator's public key.
+
+## Endpoints
+
+- **Oracle Health** (`GET /v1/defi/oracle-health`, $0.001) — single-feed health
+- **Oracle Health All** (`GET /v1/defi/oracle-health/all`, $0.005) — batch all tracked feeds
+- **Liquidation Risk** (`GET /v1/defi/liquidation-risk`, $0.01) — cascade simulation, Aave V3
+- **MEV Exposure** (`GET /v1/defi/mev-exposure`, $0.005) — sandwich risk per pool + size
+- **Sandwich Activity** (`GET /v1/defi/sandwich-activity`, $0.005) — real-time detection
+- **IL Risk** (`GET /v1/defi/il-risk`, $0.01) — predictive impermanent loss
+
+## Operator
+
+Juan Cruz Maisú, independent researcher, Buenos Aires. First-party operator, single author, fully open source.
+
+- Source: <https://github.com/asastuai/vigil>
+- Aletheia stack: <https://github.com/asastuai/aletheia>
+- Proof of Context spec: <https://github.com/asastuai/proof-of-context>
+
+## Honest scope
+
+What this provides: x402-paid DeFi risk signals with Ed25519-signed PoC attestations carrying declared freshness horizons.
+
+What this does NOT provide: live trade execution (use SUR Protocol for that), generic OHLCV (use BaseOracle for that), upstream oracle source honesty (Vigil vouches for the freshness of the signal at signing time, not for the correctness of Chainlink / Aave / Uniswap data being attested).

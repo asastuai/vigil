@@ -1,0 +1,82 @@
+{
+  "id": "vigil",
+  "name": "Vigil",
+  "description": "DeFi hard intelligence feeds for AI agents on Base. Six paid endpoints: Chainlink oracle health, liquidation cascade simulation (Aave V3), MEV exposure scoring, real-time sandwich detection, impermanent-loss prediction, plus an agent-service-price oracle. Every paid response carries an Ed25519-signed Proof-of-Context attestation typed as f_i (input freshness) with a declared per-feed horizon.",
+  "url": "https://vigil-production.up.railway.app",
+  "category": "data",
+  "x402Version": 2,
+  "networks": ["eip155:8453"],
+  "operator": {
+    "name": "Juan Cruz Maisú",
+    "github": "https://github.com/asastuai",
+    "publicKey": "https://vigil-production.up.railway.app/v1/poc/public-key"
+  },
+  "endpoints": [
+    {
+      "path": "/v1/defi/oracle-health",
+      "method": "GET",
+      "price": "$0.001",
+      "asset": "USDC",
+      "network": "eip155:8453",
+      "description": "Oracle Health: Chainlink feed staleness, deviation from spot, sequencer status. f_i PoC attestation."
+    },
+    {
+      "path": "/v1/defi/oracle-health/all",
+      "method": "GET",
+      "price": "$0.005",
+      "asset": "USDC",
+      "network": "eip155:8453",
+      "description": "Oracle Health (batch): same data for every tracked Chainlink feed on Base. f_i PoC attestation."
+    },
+    {
+      "path": "/v1/defi/liquidation-risk",
+      "method": "GET",
+      "price": "$0.01",
+      "asset": "USDC",
+      "network": "eip155:8453",
+      "description": "Liquidation Cascade Simulation: given a price-drop scenario, return how many positions liquidate, cascade depth, total notional at risk. Aave V3 today, more protocols planned. f_i PoC attestation."
+    },
+    {
+      "path": "/v1/defi/mev-exposure",
+      "method": "GET",
+      "price": "$0.005",
+      "asset": "USDC",
+      "network": "eip155:8453",
+      "description": "MEV Exposure Score: sandwich-attack risk for a pool given a trade size. f_i PoC attestation."
+    },
+    {
+      "path": "/v1/defi/sandwich-activity",
+      "method": "GET",
+      "price": "$0.005",
+      "asset": "USDC",
+      "network": "eip155:8453",
+      "description": "Real-time Sandwich Detection: is a pool being actively sandwiched right now? f_i PoC attestation."
+    },
+    {
+      "path": "/v1/defi/il-risk",
+      "method": "GET",
+      "price": "$0.01",
+      "asset": "USDC",
+      "network": "eip155:8453",
+      "description": "Predictive Impermanent Loss Risk: projected IL for an LP position over a configurable timeframe. f_i PoC attestation."
+    }
+  ],
+  "freeEndpoints": [
+    "/",
+    "/v1/poc/public-key",
+    "/v1/defi/feeds",
+    "/v1/oracle/capabilities"
+  ],
+  "links": {
+    "source": "https://github.com/asastuai/vigil",
+    "license": "MIT",
+    "aletheiaStack": "https://github.com/asastuai/aletheia",
+    "proofOfContextSpec": "https://github.com/asastuai/proof-of-context/blob/main/SPEC-WIRE-FORMAT-v0.1.md"
+  },
+  "differentiators": [
+    "Every paid response wrapped with Ed25519-signed Proof-of-Context attestation (when POC_SIGNING_KEY is configured) over a canonical-JSON SHA-256 hash with declared per-feed freshness horizon",
+    "Cross-language hash equality verified against four reference implementations of the wire format v0.1 spec",
+    "First-mover on MEV exposure scoring, sandwich activity detection, and predictive IL risk in the agentic data category (no equivalent x402 service catalogued at agentic.market scan time)",
+    "Differentiated from generic price feeds: Vigil specializes in risk signals that DeFi-native agents need, not commodity OHLCV"
+  ]
+}
